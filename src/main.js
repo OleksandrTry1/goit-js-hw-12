@@ -6,6 +6,8 @@ import {
   createGallery,
   hideLoader,
   showLoader,
+  showLoadBtn,
+  hideLoadBtn
 } from './js/render-functions';
 
 const refs = {
@@ -17,14 +19,6 @@ let currentPage = 1;
 let searchQuery = null;
 let maxPages = 0;
 const perPage = 15;
-
-function hideLoadBtn() {
-  refs.loadMoreBtn.classList.add('is-hidden');
-}
-
-function showLoadBtn() {
-  refs.loadMoreBtn.classList.remove('is-hidden');
-}
 
 async function onSearchFormSubmit(event) {
   event.preventDefault();
@@ -44,26 +38,27 @@ async function onSearchFormSubmit(event) {
 
     if (images.length > 0) {
       createGallery(images);
-
       maxPages = Math.ceil(data.totalHits / perPage);
 
       if (maxPages > 1) {
         showLoadBtn();
       } else {
         hideLoadBtn();
+        iziToast.info({
+          message: "We're sorry, but you've reached the end of search results.",
+          position: 'topRight',
+        });
       }
     } else {
       iziToast.error({
-        message:
-          'Sorry, there are no images matching your search query. Please try again!',
+        message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
       });
     }
   } catch (error) {
     console.error('Ошибка при поиске:', error);
     iziToast.error({
-      message:
-        'Something went wrong while fetching images. Please try again later!',
+      message: 'Something went wrong while fetching images. Please try again later!',
       position: 'topRight',
     });
   } finally {
@@ -77,6 +72,8 @@ async function onLoadMore() {
 
   if (!searchQuery) return;
 
+  hideLoadBtn();
+
   try {
     showLoader();
     const data = await getImagesByQuery(searchQuery, currentPage);
@@ -85,23 +82,27 @@ async function onLoadMore() {
 
     if (currentPage >= maxPages) {
       hideLoadBtn();
-
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
       });
+    } else {
+      showLoadBtn();
     }
 
-    window.scrollBy({
-      left: 0,
-      top: 360,
-      behavior: 'smooth',
-    });
+    const galleryItem = document.querySelector('.gallery-item');
+    if (galleryItem) {
+      const cardHeight = galleryItem.getBoundingClientRect().height;
+      window.scrollBy({
+        left: 0,
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      }); 
+    }
   } catch (error) {
     console.error('Ошибка при загрузке дополнительных картинок:', error);
     iziToast.error({
-      message:
-        'Something went wrong while fetching images. Please try again later!',
+      message: 'Something went wrong while fetching images. Please try again later!',
       position: 'topRight',
     });
   } finally {
