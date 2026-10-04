@@ -38,7 +38,7 @@ export function createGallery(images) {
     const { webformatURL, largeImageURL, tags, likes, views, comments, downloads } = image;
 
     return `
-      <li class="images-list-item">
+      <li class="images-list-item gallery-item">
         <a class="gallery-link" href="${largeImageURL}">
           <img class="gallery-image" src="${webformatURL}" alt="${tags}" loading="lazy" />
         </a>
@@ -64,7 +64,7 @@ export function createGallery(images) {
     `;
   }).join('');
 
-  refs.imagesList.innerHTML = markup;
+  refs.imagesList.insertAdjacentHTML('beforeEnd', markup);
 
   lightbox.refresh();
 }
@@ -79,4 +79,8 @@ export function showLoader() {
 
 export function hideLoader() {
     refs.loadLabel.classList.add('is-hidden')
+}
+
+export function showMoreButton() {
+  refs.loadLabel
 }
